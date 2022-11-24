@@ -245,6 +245,26 @@ class MicroStyleGANGeneratorBlock(nn.Module):
     def get_self(self):
         return self;
 
+class MicroStyleGANDiscriminator(nn.Module):
+    """
+    Discriminator:
+    Values:
+        dict_doc: a
+    """
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, classes):
+        super().__init__()
+        self.L1 = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
+        self.activation = nn.ReLU()
+        self.L2 = nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding)
+        self.linear = nn.Linear(len(nn.Flatten()), len(classes))
+
+    def forward(self, img):
+        emb = self.L1(img)
+        emb = self.activation(emb)
+        emb = self.L2(emb)
+        emb = self.activation(emb)
+        classes = self.linear(emb)
+        return classes
 
 class MicroStyleGANGenerator(nn.Module):
     '''
@@ -371,4 +391,13 @@ for alpha in np.linspace(0, 1, num=5):
     images += [tensor for tensor in viz_result]
 # show_tensor_images(torch.stack(images), nrow=viz_samples, num_images=len(images))
 mu_stylegan = mu_stylegan.train()
+mu_stylegan_disc = MicroStyleGANDiscriminator()
+mu_stylegan_disc = mu_stylegan_disc.train()
 print("All run!")
+
+num_epochs = 50
+G = mu_stylegan
+D = mu_stylegan_disc
+for i in range(num_epochs):
+    # Do the stuff
+    pass
